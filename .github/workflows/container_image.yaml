@@ -74,9 +74,8 @@ jobs:
             type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
             type=ref,event=branch,prefix=branch-,enable=${{ github.ref != 'refs/heads/main' }}
             type=ref,event=tag,prefix=
-            # `latest` is the newest release. Until the first release, this PR branch
-            # stands in; once it merges nothing pushes it, and v0.0.1 replaces `latest`.
-            type=raw,value=latest,enable=${{ github.ref_type == 'tag' || github.ref == 'refs/heads/feat/initial-caches' }}
+            # `latest` is the newest release.
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
             type=sha,format=short,prefix=
             type=sha,format=long,prefix=
 
