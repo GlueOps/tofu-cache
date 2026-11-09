@@ -176,12 +176,17 @@ burst of concurrent requests), private and turned-private repos, moving refs, ca
 folding and default-branch renames, clone time limit, disk floor and eviction, refused
 requests, and container lifecycle. Per-run output lands in `test/e2e/out/`.
 
-Releases: Conventional Commits on `main` drive release-please; merging its release
-PR tags `vX.Y.Z` (the first is v0.0.1), which runs `container_image.yaml` to publish
-both images for amd64 and arm64, tagged with the version and the commit SHA (a
-manual run publishes `<branch>` and SHA tags instead). Only commits on `main` are
-published; PRs build both images without pushing. The
-workflow summary prints the `tag@digest` pins for the mirror-stack installer.
-`cleanup_images.yaml` runs nightly: releases (`v*`) and `main` are kept; other tags
-beyond the newest 5, and untagged or partial images, are deleted once older than 5
-days. New GHCR packages start private; both must be public for anonymous pulls.
+Publishing (`container_image.yaml`, `cleanup_images.yaml`):
+
+- **Every push** (and manual run) publishes both images, amd64 and arm64, as
+  `ghcr.io/glueops/tofu-cache-<image>:<sha>`, plus `:main` on main or
+  `:branch-<name>` elsewhere (`/` becomes `-`). Use these to test any commit,
+  including a PR's head; fork PRs build without pushing. **Pin only `v*` tags**:
+  the others are unreleased code and are pruned.
+- **Releases:** Conventional Commits on `main` drive release-please; merging its
+  release PR tags `vX.Y.Z` (the first is v0.0.1) on `main`, which publishes that
+  version. The workflow summary prints the `tag@digest` pins for the mirror-stack
+  installer.
+- **Cleanup** runs nightly: `v*` and `main` are kept; other tags beyond the newest 5,
+  and untagged or partial images, are deleted once older than 5 days.
+- New GHCR packages start private; both must be public for anonymous pulls.

@@ -14,7 +14,7 @@ test/e2e/         run.sh (the suite), compose.yaml, Caddy with the installer's r
                   a tofu client image and fixtures
 test/fake-github/ git smart-HTTP stand-in for github.com (401s, ctl advance|hide)
 .github/workflows ci (lint incl. actionlint, e2e; nightly), release-please,
-                  container_image (PR build check; publish on v* tags), cleanup_images (nightly GHCR prune)
+                  container_image (publish every push by SHA; v* tags = releases), cleanup_images (nightly GHCR prune)
 ```
 
 ## Build and test (Docker only)
