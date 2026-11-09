@@ -1,0 +1,49 @@
+name: ci
+
+# Lint and the end-to-end suite on every PR and push to main. Nightly too: the
+# provider cache depends on the registries' live JSON shape and GitHub's CDN
+# hosts, which can change without any commit here.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: shellcheck
+        run: |
+          docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck:v0.11.0@sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d \
+            --severity=warning git/*.sh test/fake-github/*.sh test/e2e/run.sh test/e2e/client/client.sh
+      - name: actionlint
+        run: |
+          docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -shellcheck=
+      - name: hadolint
+        run: |
+          for f in providers/Dockerfile git/Dockerfile test/fake-github/Dockerfile test/e2e/client/Dockerfile test/e2e/caddy/Dockerfile; do
+            echo "== $f"
+            docker run --rm -i hadolint/hadolint:v2.14.0@sha256:27086352fd5e1907ea2b934eb1023f217c5ae087992eb59fde121dce9c9ff21e < "$f"
+          done
+
+  e2e:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: End-to-end suite
+        env:
+          # Nightly also waits out the API TTL to test serving STALE.
+          E2E_SLOW: ${{ github.event_name == 'schedule' && '1' || '' }}
+        run: bash test/e2e/run.sh
