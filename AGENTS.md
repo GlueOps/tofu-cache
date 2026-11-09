@@ -38,7 +38,8 @@ Locally the Docker daemon may be on the host (devcontainer): keep the checkout u
 
 - Conventional Commits; release-please cuts one version for both images. Base-image
   and dependency bumps are `fix:` (a `chore:` never ships).
-- Pin every image by tag@digest and every action by SHA. No `latest` tag.
+- Pin every image by tag@digest and every action by SHA. `latest` exists only as "the
+  newest release", for CI that wants it (the CD action's mirror test); never pin it.
 - Any behaviour change gets a check in `test/e2e/run.sh`.
 - Never return 401 or `WWW-Authenticate` from the git cache: git would then offer
   the client's credentials. Never send credentials upstream from either image.

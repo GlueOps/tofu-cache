@@ -183,10 +183,11 @@ Publishing (`container_image.yaml`, `cleanup_images.yaml`):
   `:branch-<name>` elsewhere (`/` becomes `-`). Use these to test any commit,
   including a PR's head; fork PRs build without pushing. **Pin only `v*` tags**:
   the others are unreleased code and are pruned.
+- **`latest`** is the newest release. Never pin it.
 - **Releases:** Conventional Commits on `main` drive release-please; merging its
   release PR tags `vX.Y.Z` (the first is v0.0.1) on `main`, which publishes that
   version. The workflow summary prints the `tag@digest` pins for the mirror-stack
   installer.
-- **Cleanup** runs nightly: `v*` and `main` are kept; other tags beyond the newest 5,
+- **Cleanup** runs nightly: `v*`, `main` and `latest` are kept; other tags beyond the newest 5,
   and untagged or partial images, are deleted once older than 5 days.
 - New GHCR packages start private; both must be public for anonymous pulls.
