@@ -97,7 +97,7 @@ downloads.
 | `…/<version>/download/<os>/<arch>` (rewritten to point at the file routes below) | 1 day | last copy served |
 | release zips, `SHA256SUMS`, `.sig` | until unused for 60 days | last copy served |
 
-Release files have their own 10 GB zone; over that, the least recently used go first.
+Release files have their own 20 GB zone; over that, the least recently used go first.
 GitHub's redirect to its CDN is followed by the cache, never by the client; each hop
 must be a known GitHub asset host. Only those two registries and only provider files
 are served: release files named `terraform-provider-*` (how every registry download
@@ -123,7 +123,7 @@ So during an outage a moving ref like `?ref=main` serves whatever it was at the 
 successful refresh; tags and SHAs are unaffected. Only `git-upload-pack` (clone and
 fetch) is served, never push. Each repo is bounded by time, not size: 5 minutes to
 clone, 10 seconds to refresh. The disk is bounded in total by a sweep every 10 minutes:
-a repo unused for 60 days is removed, and while the cache is over 10 GB or the disk is
+a repo unused for 60 days is removed, and while the cache is over 20 GB or the disk is
 under the free floor the least recently used go first. The sweep also runs
 `git gc --auto` on each mirror. Owner and repo names are case-insensitive, as on
 GitHub: `ACME/Mod` and `acme/mod.git` are one cache entry.
@@ -132,7 +132,7 @@ Settings (environment variables on the git container):
 
 | Variable | Default |
 | --- | --- |
-| `GIT_CACHE_MAX_TOTAL_MB` | `10240` |
+| `GIT_CACHE_MAX_TOTAL_MB` | `20480` |
 | `GIT_CACHE_CLONE_SECONDS` (time limit for a first clone; above ~330 also raise nginx's `fastcgi_read_timeout` and Caddy's `response_header_timeout`) | `300` |
 | `GIT_CACHE_MIN_FREE_MB` (free-disk floor: no new clones below it, and the sweep evicts to restore it) | `2048` |
 | `GIT_CACHE_EVICT_DAYS` | `60` |

@@ -101,7 +101,7 @@ Settled; don't re-raise in review.
 - Git: refresh at most every 60s; serve the last copy on any failure except 401;
   401 deletes. No GitHub token, even for rate limits.
 - Limits: per repo by time only (5 min clone, 10s refresh), no per-repo size cap.
-  Disk: git 10 GB total, provider files 10 GB; least recently used rolls off;
+  Disk: git 20 GB total, provider files 20 GB; least recently used rolls off;
   anything unused for 60 days is evicted.
 - Download JSON cached 1 day, version lists 2 minutes.
 - One repo, two images, one shared version: a release restarts both containers
