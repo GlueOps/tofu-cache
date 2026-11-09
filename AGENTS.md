@@ -13,7 +13,8 @@ git/              nginx + fcgiwrap + git-cgi.sh (bare mirrors, git http-backend)
 test/e2e/         run.sh (the suite), compose.yaml, Caddy with the installer's routes,
                   a tofu client image and fixtures
 test/fake-github/ git smart-HTTP stand-in for github.com (401s, ctl advance|hide)
-.github/workflows ci (lint + e2e, nightly), images (multi-arch build/push), release-please
+.github/workflows ci (lint incl. actionlint, e2e; nightly), release-please,
+                  container_image (PR build check; publish on v* tags), cleanup_images (nightly GHCR prune)
 ```
 
 ## Build and test (Docker only)
@@ -24,6 +25,7 @@ The same commands CI runs (`.github/workflows/ci.yml`):
 bash test/e2e/run.sh
 docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck:v0.11.0@sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d \
   --severity=warning git/*.sh test/fake-github/*.sh test/e2e/run.sh test/e2e/client/client.sh
+docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -shellcheck=
 for f in providers/Dockerfile git/Dockerfile test/fake-github/Dockerfile test/e2e/client/Dockerfile test/e2e/caddy/Dockerfile; do
   docker run --rm -i hadolint/hadolint:v2.14.0@sha256:27086352fd5e1907ea2b934eb1023f217c5ae087992eb59fde121dce9c9ff21e < "$f"
 done
@@ -74,6 +76,8 @@ Locally the Docker daemon may be on the host (devcontainer): keep the checkout u
 - **Mirrors carry `gc.auto=0`**: a fetch's auto-gc inside the 10s timeout gets killed
   on big repos. The sweep runs `gc --auto` under the lock instead.
 - **bash: a word `case` inside `$( … )` breaks parsing**, even as an argument (`$(client case …)`).
+- **release-please must use the GitHub App token.** A tag pushed with GITHUB_TOKEN
+  doesn't trigger other workflows, so a release would publish no images.
 - **A cold clone needs the `ls-remote` probe first**: git has no connect timeout,
   and a clone against an unreachable host hangs ~300s.
 - **The OpenTofu image cannot be a base image** (`ONBUILD RUN exit 1`) and BuildKit

@@ -177,6 +177,11 @@ folding and default-branch renames, clone time limit, disk floor and eviction, r
 requests, and container lifecycle. Per-run output lands in `test/e2e/out/`.
 
 Releases: Conventional Commits on `main` drive release-please; merging its release
-PR tags `vX.Y.Z` (the first is v1.0.0), which publishes both images. The workflow summary prints the
-`tag@digest` pins for the mirror-stack installer. New GHCR packages start private;
-both must be public for anonymous pulls.
+PR tags `vX.Y.Z` (the first is v0.0.1), which runs `container_image.yaml` to publish
+both images for amd64 and arm64, tagged with the version and the commit SHA (a
+manual run publishes `<branch>` and SHA tags instead). Only commits on `main` are
+published; PRs build both images without pushing. The
+workflow summary prints the `tag@digest` pins for the mirror-stack installer.
+`cleanup_images.yaml` runs nightly: releases (`v*`) and `main` are kept; other tags
+beyond the newest 5, and untagged or partial images, are deleted once older than 5
+days. New GHCR packages start private; both must be public for anonymous pulls.
