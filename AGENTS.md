@@ -79,6 +79,10 @@ Locally the Docker daemon may be on the host (devcontainer): keep the checkout u
 - **bash: a word `case` inside `$( … )` breaks parsing**, even as an argument (`$(client case …)`).
 - **release-please must use the GitHub App token.** A tag pushed with GITHUB_TOKEN
   doesn't trigger other workflows, so a release would publish no images.
+- **Keep `proxy_max_temp_file_size 0`.** Requests released by
+  `proxy_cache_lock_timeout` while a slow first fill runs are proxied uncached and
+  would otherwise buffer through `/tmp`, a tmpfs when deployed. When it fills, nginx
+  logs `pwritev() ... has written only` and the client gets a 200 with a truncated body.
 - **A cold clone needs the `ls-remote` probe first**: git has no connect timeout,
   and a clone against an unreachable host hangs ~300s.
 - **The OpenTofu image cannot be a base image** (`ONBUILD RUN exit 1`) and BuildKit
@@ -108,4 +112,7 @@ Settled; don't re-raise in review.
   (~1s, caches survive). Accepted.
 - Deferred: per-client rate limiting, cache-hit columns in mirror-stats.
 - Not in the e2e suite: the `@dl_follow` 502 for a redirect to an unlisted host (real
-  GitHub can't be made to send one); verified by hand 2026-11-09. Git LFS is unsupported.
+  GitHub can't be made to send one); verified by hand 2026-11-09. Likewise
+  `proxy_max_temp_file_size 0` (it needs an upstream slower than the 120s lock timeout;
+  the suite fetches providers from the real registries); verified by hand 2026-11-16.
+  Git LFS is unsupported.
