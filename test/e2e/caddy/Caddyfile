@@ -1,0 +1,44 @@
+# The routes the mirror-stack installer adds for these images, on a test hostname.
+{
+	local_certs
+	skip_install_trust
+	admin off
+}
+
+repo.example.test {
+	tls internal
+
+	handle /repository/tofu/* {
+		reverse_proxy providers:8080 {
+			header_up -Authorization
+			header_up -Proxy-Authorization
+			header_up -Cookie
+			header_up -X-Forwarded-For
+			header_up -X-Forwarded-Proto
+			header_up -X-Forwarded-Host
+			header_down -Set-Cookie
+			header_down -WWW-Authenticate
+		}
+	}
+
+	handle /repository/git/* {
+		reverse_proxy git:8080 {
+			header_up -Authorization
+			header_up -Proxy-Authorization
+			header_up -Cookie
+			header_up -X-Forwarded-For
+			header_up -X-Forwarded-Proto
+			header_up -X-Forwarded-Host
+			header_down -Set-Cookie
+			header_down -WWW-Authenticate
+			flush_interval -1
+			transport http {
+				response_header_timeout 11m
+			}
+		}
+	}
+
+	handle {
+		respond 404
+	}
+}

@@ -1,0 +1,68 @@
+# Clients reach only Caddy; only the caches have internet (egress). Disconnecting
+# egress simulates an upstream outage. No bind mounts: everything is baked into
+# images, so it runs the same under a remote Docker daemon as in CI.
+networks:
+  front:
+    internal: true
+  back:
+    internal: true
+  egress: {}
+
+volumes:
+  caddy-data: {}
+  providers-cache: {}
+  git-cache: {}
+
+services:
+  caddy:
+    build: caddy
+    volumes:
+      - caddy-data:/data
+    networks:
+      front:
+        aliases: [repo.example.test]
+      back: {}
+
+  providers:
+    build: ../../providers
+    read_only: true
+    tmpfs: [/tmp]
+    volumes:
+      - providers-cache:/cache
+    networks: [back, egress]
+
+  git:
+    build: ../../git
+    read_only: true
+    tmpfs: [/tmp]
+    environment:
+      GIT_CACHE_UPSTREAM: http://fake-github:8080
+      GIT_CACHE_REFRESH_SECONDS: "3"
+      GIT_CACHE_CLONE_SECONDS: "8"
+    volumes:
+      - git-cache:/cache
+    networks: [back, egress]
+
+  fake-github:
+    build: ../fake-github
+    networks: [egress]
+
+  client:
+    profiles: [client]
+    build:
+      context: client
+      additional_contexts:
+        tofu: docker-image://ghcr.io/opentofu/opentofu:1.13.9@sha256:f5aef7f2632b490e3c289a239d7974497d0583f3df6bfa35e8eb31a367ee5ec0
+    volumes:
+      - caddy-data:/caddy:ro
+    networks: [front]
+
+  client-oldest:
+    profiles: [client]
+    build:
+      context: client
+      additional_contexts:
+        tofu: docker-image://ghcr.io/opentofu/opentofu:1.8.11@sha256:5201379f7d79cdce8c475a0b2bb0c0aef742604c6a6ae3cd64c62a797d043714
+    volumes:
+      - caddy-data:/caddy:ro
+    networks: [front]
