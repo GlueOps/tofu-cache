@@ -1,6 +1,6 @@
 # Same nginx the mirror stack already pins; config is baked in, so a new image
 # digest is the only way config changes and compose recreates the container.
-FROM nginx:1.31.6-alpine@sha256:d10753d9289b8e3f884386351f73554ce72b631378949deddd75e83ee296c427
+FROM nginx:1.31.9-alpine@sha256:90b6bd2aec278b16b98221d64deb1d6d35d164567f507ab0716e6053878315aa
 
 RUN install -d -o 101 -g 101 /cache
 COPY nginx.conf /etc/nginx/nginx.conf
