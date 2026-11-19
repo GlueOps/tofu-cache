@@ -1,6 +1,6 @@
 # Same nginx base the mirror stack pins, plus git tooling. git-daemon is the
 # package that ships `git http-backend`; flock is util-linux's (busybox's has no -w).
-FROM nginx:1.31.9-alpine@sha256:90b6bd2aec278b16b98221d64deb1d6d35d164567f507ab0716e6053878315aa
+FROM nginx:1.31.9-alpine@sha256:fb4658584bd9a916ffb6f6e365f97c25cfdb2923801f551ea08356e695f14ff7
 
 # Unpinned on purpose: Alpine removes superseded versions, so =x.y pins break rebuilds.
 # The base digest fixes the Alpine branch; each release build takes its current patches.
